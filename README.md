@@ -1,51 +1,73 @@
-# Emergency Alert System Using NodeMCU and GPS
+# Smart Guard Alert Device
+
+An IoT-based emergency alert system using **NodeMCU (ESP8266), GPS, and Telegram** to send emergency notifications along with the user's location.
 
 ## Project Overview
-This project is an IoT-based Emergency Alert System designed to send real-time emergency notifications through Telegram using NodeMCU and GPS technology.
 
-The system helps users quickly notify the appropriate authorities during emergencies by sending alert messages along with location information.
+The Smart Guard Alert Device is designed to provide a quick and simple way to send emergency alerts during critical situations.
 
-## Features
-- Real-time emergency alerts
-- Telegram Bot integration
-- GPS-based location tracking
-- Fast emergency communication
-- Supports multiple emergency types
+When the user presses an emergency button, the NodeMCU ESP8266 processes the input, obtains location information from the GPS module, and sends an emergency notification through Telegram.
 
-## Components Used
-- NodeMCU (ESP8266)
-- GPS Module
+The system is designed for applications such as campus safety, personal security, and emergency assistance.
+
+## Key Features
+
+- Emergency alert using physical push buttons
+- Police and Medical emergency options
+- GPS-based location information
+- Telegram-based emergency notifications
+- ESP8266 Wi-Fi connectivity
+- Fast communication during emergency situations
+- Simple and low-cost hardware implementation
+
+## Hardware Components
+
+- NodeMCU ESP8266
+- NEO-6M GPS Module
 - Push Buttons
 - Breadboard
 - Jumper Wires
+- USB Cable
 
-## Software Used
+## Software & Technologies
+
 - Arduino IDE
-- C++
+- C/C++ programming
+- ESP8266
+- GPS communication
 - Telegram Bot API
+- Serial communication
+- GPIO
 
-## Working
-1. User presses an emergency button.
-2. NodeMCU detects the emergency type.
-3. GPS module obtains location data.
-4. Telegram Bot sends an alert message.
-5. The message reaches the designated recipient instantly.
+## System Architecture
 
-## Applications
-- Campus Safety
-- Personal Security
-- Emergency Response Systems
-- Smart City Solutions
-
-## Future Improvements
-- Mobile application integration
-- Cloud database storage
-- Multiple emergency contacts
-- Live location tracking
-
-## Developed By
-Indusree
-
-First-Year Electronics and Communication Engineering (ECE) Student
-
-East West College of Engineering
+```text
+          ┌──────────────────┐
+          │  Emergency       │
+          │  Buttons         │
+          │ Police / Medical │
+          └────────┬─────────┘
+                   │
+                   ▼
+          ┌──────────────────┐
+          │   NodeMCU        │
+          │   ESP8266        │
+          │                  │
+          │ GPIO Processing  │
+          │ Decision Making  │
+          └───────┬──────────┘
+                  │
+          ┌───────┴──────────┐
+          │                  │
+          ▼                  ▼
+   ┌──────────────┐   ┌───────────────┐
+   │  NEO-6M GPS  │   │   Wi-Fi /     │
+   │              │   │   Telegram    │
+   └──────────────┘   └───────┬───────┘
+                               │
+                               ▼
+                      ┌────────────────┐
+                      │ Emergency      │
+                      │ Alert Message  │
+                      │ + Location     │
+                      └────────────────┘
