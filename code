@@ -1,0 +1,136 @@
+#include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
+#include <SoftwareSerial.h>
+#include <TinyGPS++.h>
+
+// =========================
+// GPS
+// =========================
+SoftwareSerial gpsSerial(D1, D2);   // GPS TX -> D1, GPS RX -> D2
+TinyGPSPlus gps;
+
+// =========================
+// WiFi
+// =========================
+const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASSWORD";
+
+// =========================
+// Telegram
+// =========================
+String botToken = "YOUR_TELEGRAM_BOT_TOKEN";
+
+String chatID1 = "YOUR_POLICE_CHAT_ID";
+String chatID2 = "YOUR_MEDICAL_CHAT_ID";
+
+WiFiClientSecure client;
+
+// =========================
+// Emergency Buttons
+// =========================
+#define POLICE_BTN D5
+#define MEDICAL_BTN D6
+
+void setup()
+{
+    Serial.begin(115200);
+    gpsSerial.begin(9600);
+
+    pinMode(POLICE_BTN, INPUT_PULLUP);
+    pinMode(MEDICAL_BTN, INPUT_PULLUP);
+
+    // Connect to WiFi
+    WiFi.begin(ssid, password);
+
+    Serial.print("Connecting WiFi");
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print(".");
+    }
+
+    Serial.println();
+    Serial.println("WiFi Connected");
+    Serial.println(WiFi.localIP());
+
+    // Configure secure client
+    client.setInsecure();
+}
+
+void loop()
+{
+    // Read GPS data
+    while (gpsSerial.available())
+    {
+        gps.encode(gpsSerial.read());
+    }
+
+    // Display GPS location
+    if (gps.location.isValid())
+    {
+        Serial.print("LAT: ");
+        Serial.println(gps.location.lat(), 6);
+
+        Serial.print("LNG: ");
+        Serial.println(gps.location.lng(), 6);
+    }
+
+    // Police emergency button
+    if (digitalRead(POLICE_BTN) == LOW)
+    {
+        sendTelegram(chatID1, "POLICE_EMERGENCY");
+        delay(3000);
+    }
+
+    // Medical emergency button
+    if (digitalRead(MEDICAL_BTN) == LOW)
+    {
+        sendTelegram(chatID2, "MEDICAL_EMERGENCY");
+        delay(3000);
+    }
+}
+
+void sendTelegram(String chatID, String message)
+{
+    String lat = "0.000000";
+    String lng = "0.000000";
+
+    // Get latest valid GPS coordinates
+    if (gps.location.isValid())
+    {
+        lat = String(gps.location.lat(), 6);
+        lng = String(gps.location.lng(), 6);
+    }
+
+    // Create emergency message with Google Maps location
+    String fullMessage = message +
+                         "%0ALocation:%20https://maps.google.com/?q=" +
+                         lat + "," + lng;
+
+    // Connect to Telegram server
+    if (!client.connect("api.telegram.org", 443))
+    {
+        Serial.println("Telegram Connection Failed");
+        return;
+    }
+
+    String url = "/bot" + botToken +
+                 "/sendMessage?chat_id=" + chatID +
+                 "&text=" + fullMessage;
+
+    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+                 "Host: api.telegram.org\r\n" +
+                 "Connection: close\r\n\r\n");
+
+    delay(3000);
+
+    Serial.println("Telegram Response:");
+
+    while (client.available())
+    {
+        Serial.write(client.read());
+    }
+
+    client.stop();
+}
